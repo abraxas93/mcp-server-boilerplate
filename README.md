@@ -1,40 +1,36 @@
-# TypeScript Backend Template
+# MCP Server Boilerplate
 
 ## 🚀 Overview
 
-Enterprise-grade TypeScript backend template built with Clean Architecture principles. This template provides a solid foundation for building scalable microservices and APIs with modern tooling and best practices.
+A production-ready TypeScript boilerplate for building Model Context Protocol (MCP) servers. This template provides a solid foundation for creating MCP servers with clean architecture, comprehensive error handling, and extensible tool/resource management.
 
 ## ✨ Features
 
-- 🏗️ **Clean Architecture** - Domain, Application, and Infrastructure layers
-- ⚡ **Fastify** - High-performance web framework
-- 🗄️ **MongoDB** - NoSQL database with connection health monitoring
-- 🔧 **TypeScript** - Type-safe development with latest ES features
-- 🧪 **Jest** - Comprehensive testing framework with 10+ tests
-- 📝 **Winston** - Structured logging with multiple transports
-- 💉 **TSyringe** - Dependency injection container
-- 🐳 **Docker** - Container support for deployment
-- 🔍 **ESLint + Prettier** - Code quality and formatting
-- 🌍 **Multi-environment** - Development, staging, production configs
-- 📋 **Task Runner** - Custom task execution system
+- 🔧 **MCP Protocol Support** - Full MCP server implementation with tools and resources
+- ⚡ **TypeScript** - Type-safe development with modern ES features
+- 🛠️ **Tool System** - Easy-to-extend tool architecture with Zod validation
+- 📁 **Resource Management** - File and configuration resource support
+- 🎯 **Clean Architecture** - Dependency injection and service layer separation
+- 🚨 **Error Handling** - Comprehensive error management with proper MCP responses
+- 🧪 **Testing Ready** - Jest configuration for unit and integration tests
+- 🐳 **Docker Support** - Container-ready deployment
+- 📝 **Code Quality** - ESLint + Prettier for consistent code style
 
 ## 🛠️ Technology Stack
 
-- **Runtime**: Node.js >= 22.0.0 LTS
+- **Runtime**: Node.js >= 22.0.0
 - **Language**: TypeScript 5.x
-- **Framework**: Fastify 5.x
-- **Database**: MongoDB 8.x
-- **Testing**: Jest 29.x
-- **DI Container**: TSyringe 4.x
-- **Logging**: Winston 3.x
+- **MCP SDK**: @modelcontextprotocol/sdk 1.18.2
+- **Validation**: Zod 3.x with JSON Schema generation
+- **Testing**: Jest 30.x
 - **Linting**: ESLint 8.x + Prettier 3.x
+- **Build**: TypeScript compiler with path aliases
 
 ## 🚦 Quick Start
 
 ### Prerequisites
 
 - Node.js >= 22.0.0
-- MongoDB instance (local or cloud)
 - Git
 
 ### Installation
@@ -42,36 +38,23 @@ Enterprise-grade TypeScript backend template built with Clean Architecture princ
 ```bash
 # Clone the template
 git clone <your-repo-url>
-cd typescript-backend-template
+cd mcp-server-template
 
 # Install dependencies
 npm install
 
-# Copy environment file
-cp .env.example .env
+# Build the project
+npm run build
 
-# Update environment variables
-# Edit .env with your MongoDB connection and other settings
-
-# Start development server
-npm run dev
+# Start the MCP server
+npm start
 ```
 
-### Environment Setup
+### Development Mode
 
-Copy `.env.example` to `.env` and configure:
-
-```env
-NODE_ENV=dev
-SERVER_PORT=3000
-SERVER_HOST=0.0.0.0
-CORS_ORIGIN=http://localhost:3000
-
-# MongoDB Configuration
-MONGO_URL=mongodb://localhost:27017
-MONGO_USER=your_username
-MONGO_PASSWORD=your_password
-MONGO_DB=your_database
+```bash
+# Start development server with hot reload
+npm run dev
 ```
 
 ## 📋 Available Scripts
@@ -85,179 +68,402 @@ npm run start        # Start production server
 # Testing
 npm test             # Run Jest test suite
 npm run test:watch   # Run tests in watch mode
-npm run test:coverage # Run tests with coverage report
 
 # Code Quality
 npm run lint         # Run ESLint
 npm run lint:fix     # Fix ESLint issues
-npm run format       # Format code with Prettier
-
-# Task Runner
-npm run task <task-name>  # Execute custom tasks
-npm run task hello        # Example: Hello world task
-npm run task health-check # Example: Health check task
 ```
 
 ## 🏗️ Project Structure
 
 ```
 src/
-├── config/               # Environment configurations
-├── infrastructure/       # External concerns (DB, web, controllers)
-│   ├── adapters/
-│   │   └── controllers/  # HTTP controllers
-│   ├── db/              # Database connections
-│   ├── di/              # Dependency injection setup
-│   └── web/             # Web server and routing
-├── tasks/               # Custom task scripts
-├── utils/               # Utility functions (logger, etc.)
-├── __tests__/           # Test files
-└── index.ts            # Application entry point
+├── config/               # Configuration management
+├── container/            # Dependency injection container
+├── handlers/            # MCP request handlers
+│   ├── tool-call-handler.ts    # Tool execution handler
+│   ├── tools-handler.ts        # Tool listing handler
+│   ├── resources-handler.ts    # Resource listing handler
+│   └── read-resource-handler.ts # Resource reading handler
+├── services/            # Business logic services
+│   ├── MathService.ts   # Mathematical operations
+│   └── ErrorService.ts  # Error handling and formatting
+├── tools/               # MCP tools implementation
+│   ├── echo.ts          # Echo tool
+│   ├── add-two-numbers.ts # Math tool
+│   └── get-time.ts      # Time tool
+├── types/               # TypeScript type definitions
+├── index.ts            # Application entry point
+└── server.ts           # MCP server setup
 ```
 
-## 🔌 API Endpoints
+## 🔧 Available Tools
 
-### Health Check
-```http
-GET /api/v1/health
-```
+The boilerplate includes three example tools to demonstrate the architecture:
 
-Returns application health status including:
-- Server uptime
-- Environment information
-- Database connection status
-- Application version
+### 1. Echo Tool
 
-**Response Example:**
+**Name**: `echo`  
+**Description**: Echo back the input text  
+**Parameters**:
+
+- `text` (string): Text to echo back
+
+**Example Usage**:
+
 ```json
 {
-  "status": "ok",
-  "timestamp": "2025-01-15T10:30:00.000Z",
-  "uptime": 3600,
-  "environment": "dev",
-  "version": "1.0.0",
-  "database": {
-    "mongodb": "connected"
+  "name": "echo",
+  "arguments": {
+    "text": "Hello, MCP!"
+  }
+}
+```
+
+### 2. Add Two Numbers Tool
+
+**Name**: `add`  
+**Description**: Add two numbers together  
+**Parameters**:
+
+- `a` (number): First number
+- `b` (number): Second number
+
+**Example Usage**:
+
+```json
+{
+  "name": "add",
+  "arguments": {
+    "a": 5,
+    "b": 3
+  }
+}
+```
+
+### 3. Get Time Tool
+
+**Name**: `get_time`  
+**Description**: Get current timestamp  
+**Parameters**:
+
+- `random_string` (string, optional): Dummy parameter for no-parameter tools
+
+**Example Usage**:
+
+```json
+{
+  "name": "get_time",
+  "arguments": {
+    "random_string": "dummy"
+  }
+}
+```
+
+## 📁 Available Resources
+
+The server provides two example resources:
+
+### 1. Example Text File
+
+**URI**: `file:///example.txt`  
+**Type**: `text/plain`  
+**Description**: A simple example text resource
+
+### 2. Server Information
+
+**URI**: `config://server-info`  
+**Type**: `application/json`  
+**Description**: Information about this MCP server including capabilities and available tools
+
+## 🛠️ Adding New Tools
+
+### 1. Create Tool Implementation
+
+Create a new file in `src/tools/`:
+
+```typescript
+// src/tools/my-tool.ts
+import { zodToJsonSchema } from 'zod-to-json-schema';
+import { z } from 'zod';
+import { CallToolResult, Tool } from '@modelcontextprotocol/sdk/types.js';
+import { IErrorService } from '../services';
+
+export const myToolInputSchema = z.object({
+  input: z.string().describe('Input parameter'),
+});
+
+export type MyToolParams = z.infer<typeof myToolInputSchema>;
+
+export const MY_TOOL: Tool = {
+  name: 'my_tool',
+  description: 'Description of what this tool does',
+  inputSchema: zodToJsonSchema(myToolInputSchema, {
+    target: 'jsonSchema7',
+  }) as Tool['inputSchema'],
+};
+
+export default function myTool(
+  this: { errorService: IErrorService },
+  params: MyToolParams,
+): CallToolResult {
+  try {
+    // Your tool logic here
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `Result: ${params.input}`,
+        },
+      ],
+    };
+  } catch (error) {
+    return this.errorService.handleError(error, {
+      operation: 'myTool',
+      params,
+      timestamp: new Date().toISOString(),
+    });
+  }
+}
+```
+
+### 2. Register Tool
+
+Update `src/tools/index.ts`:
+
+```typescript
+export * from './my-tool.js';
+```
+
+### 3. Add to Tools Handler
+
+Update `src/handlers/tools-handler.ts`:
+
+```typescript
+import { MY_TOOL } from '../tools';
+
+export async function handleListTools(
+  _request: ListToolsRequest,
+): Promise<{ tools: Tool[] }> {
+  return {
+    tools: [ECHO_TOOL, ADD_TWO_NUMBERS_TOOL, GET_TIME_TOOL, MY_TOOL],
+  };
+}
+```
+
+### 4. Add to Tool Call Handler
+
+Update `src/handlers/tool-call-handler.ts`:
+
+```typescript
+import myTool from '../tools/my-tool.js';
+
+export async function handleToolCall(
+  this: IContainer,
+  request: CallToolRequest,
+): Promise<CallToolResult> {
+  const { name, arguments: args } = request.params;
+
+  switch (name) {
+    case 'my_tool':
+      return myTool.call(this, args);
+    // ... other cases
+  }
+}
+```
+
+## 📁 Adding New Resources
+
+### 1. Update Resources Handler
+
+Add your resource to `src/handlers/resources-handler.ts`:
+
+```typescript
+export async function handleListResources(
+  _request: ListResourcesRequest,
+): Promise<{ resources: Resource[] }> {
+  return {
+    resources: [
+      // ... existing resources
+      {
+        uri: 'my-resource://data',
+        name: 'My Resource',
+        description: 'Description of my resource',
+        mimeType: 'application/json',
+      },
+    ],
+  };
+}
+```
+
+### 2. Update Read Resource Handler
+
+Add handling in `src/handlers/read-resource-handler.ts`:
+
+```typescript
+export async function handleReadResource(
+  request: ReadResourceRequest,
+): Promise<{ contents: Resource[] }> {
+  const { uri } = request.params;
+
+  switch (uri) {
+    case 'my-resource://data':
+      return {
+        contents: [
+          {
+            uri,
+            mimeType: 'application/json',
+            text: JSON.stringify({ data: 'your data here' }),
+          },
+        ],
+      };
+    // ... other cases
   }
 }
 ```
 
 ## 🧪 Testing
 
-The template includes comprehensive Jest tests:
+The boilerplate includes Jest configuration for testing:
 
 ```bash
 # Run all tests
 npm test
 
-# Run specific test file
-npm test health.test.ts
+# Run tests in watch mode
+npm run test:watch
 
-# Run tests with coverage
-npm run test:coverage
+# Run specific test file
+npm test my-tool.test.ts
 ```
 
-**Test Coverage:**
-- ✅ Health Controller tests
-- ✅ Database connection tests
-- ✅ Route manager tests
-- ✅ Error handling tests
-- ✅ Logger functionality tests
+### Example Test Structure
 
-## 🔧 Task System
+```typescript
+// src/__tests__/tools/echo.test.ts
+import echo from '../../tools/echo.js';
+import { ErrorService } from '../../services/ErrorService.js';
 
-Execute custom tasks via the task runner:
+describe('Echo Tool', () => {
+  const mockErrorService = new ErrorService();
 
-```bash
-# Available tasks
-npm run task hello        # Simple hello world
-npm run task health-check # Check application health
-npm run task example      # Example task template
+  it('should echo back the input text', () => {
+    const result = echo.call(
+      { errorService: mockErrorService },
+      { text: 'Hello, World!' },
+    );
 
-# Add new tasks in src/tasks/index.ts
+    expect(result.content).toEqual([
+      { type: 'text', text: 'Echo: Hello, World!' },
+    ]);
+  });
+});
 ```
 
 ## 🐳 Docker Support
 
+### Build Docker Image
+
 ```bash
-# Build Docker image
-docker build -t typescript-backend-template .
-
-# Run container
-docker run -p 3000:3000 \
-  -e MONGO_URL=mongodb://host.docker.internal:27017 \
-  -e MONGO_DB=your_database \
-  typescript-backend-template
+docker build -t mcp-server-template .
 ```
 
-## 🔒 Environment Support
+### Run Container
 
-The template supports multiple environments:
-
-- **Development** (`NODE_ENV=dev`) - Debug logging, CORS enabled
-- **Staging** (`NODE_ENV=staging`) - Production-like with monitoring
-- **Production** (`NODE_ENV=production`) - Optimized, secure headers
-
-## 📝 Logging
-
-Winston-based logging with multiple levels:
-
-```typescript
-import { initLogger } from './utils';
-
-const logger = initLogger(__filename);
-
-logger.info('Application started');
-logger.error('Something went wrong', { error: errorObject });
-logger.debug('Debug information', { data: debugData });
+```bash
+docker run -it mcp-server-template
 ```
 
-**Log Levels:** `error`, `warn`, `info`, `debug`
+### Dockerfile
 
-## 🔧 Customization
+The included Dockerfile creates an optimized production image:
 
-### Adding New Controllers
+```dockerfile
+FROM node:22-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY dist ./dist
+CMD ["node", "dist/index.js"]
+```
 
-1. Create controller in `src/infrastructure/adapters/controllers/`
-2. Register in dependency injection (`src/infrastructure/di/index.ts`)
-3. Add routes in `src/infrastructure/web/RouteManager.ts`
+## 🔧 Configuration
 
-### Adding New Tasks
+### Environment Variables
 
-1. Add task function in `src/tasks/index.ts`
-2. Register in the `tasks` object
-3. Execute with `npm run task <task-name>`
+Create a `.env` file for configuration:
 
-### Database Collections
+```env
+NODE_ENV=production
+LOG_LEVEL=info
+```
 
-Add new MongoDB collections by:
-1. Creating repository in `src/infrastructure/repositories/`
-2. Registering in DI container
-3. Injecting into controllers
+### TypeScript Configuration
+
+The project uses strict TypeScript configuration with:
+
+- ES2022 target
+- Node16 module resolution
+- Strict type checking
+- Source maps for debugging
+
+## 🚨 Error Handling
+
+The boilerplate includes comprehensive error handling:
+
+- **ErrorService**: Centralized error management
+- **MCP-compliant responses**: Proper error flags and messages
+- **Error categorization**: Different handling for TypeError, RangeError, etc.
+- **Context preservation**: Operation context and parameters in error logs
+
+## 🔌 MCP Protocol Features
+
+### Supported Capabilities
+
+- ✅ **Tools**: Execute custom functions with parameter validation
+- ✅ **Resources**: Read files and configuration data
+- ✅ **Stdio Transport**: Standard input/output communication
+- ✅ **JSON Schema**: Automatic schema generation from Zod schemas
+
+### Request/Response Flow
+
+1. **List Tools**: Client requests available tools
+2. **Call Tool**: Client executes tool with parameters
+3. **List Resources**: Client requests available resources
+4. **Read Resource**: Client reads resource content
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+2. Create your feature branch (`git checkout -b feature/amazing-tool`)
 3. Follow the existing code style (ESLint + Prettier)
 4. Add tests for new functionality
-5. Commit your changes (`git commit -m 'Add some amazing feature'`)
-6. Push to the branch (`git push origin feature/amazing-feature`)
+5. Commit your changes (`git commit -m 'Add amazing tool'`)
+6. Push to the branch (`git push origin feature/amazing-tool`)
 7. Open a Pull Request
+
+### Development Guidelines
+
+- Use TypeScript strict mode
+- Follow the existing architecture patterns
+- Add comprehensive error handling
+- Include unit tests for new tools
+- Update documentation for new features
 
 ## 📄 License
 
-This project is proprietary software owned by CPrime.
+This project is licensed under the ISC License.
 
 ## 🆘 Support
 
 For support and questions:
-- Check existing documentation
-- Review test examples
-- Contact the development team
+
+- Check the MCP documentation: https://modelcontextprotocol.io/
+- Review the example tools and resources
+- Check existing issues and discussions
 
 ---
 
-**Built with ❤️ by the CPrime Engineering Team**
+**Built with ❤️ for the MCP Community**
 
-*Ready to power your next microservice! 🚀*
+_Ready to power your next MCP server! 🚀_
