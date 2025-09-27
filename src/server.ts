@@ -5,35 +5,12 @@ import {
   ListResourcesRequestSchema,
   ListToolsRequestSchema,
   ReadResourceRequestSchema,
-  CallToolRequest,
-  CallToolResult,
-  ListToolsRequest,
-  ListResourcesRequest,
-  ReadResourceRequest,
-  Tool,
-  Resource,
-  ListPromptsRequest,
-  Prompt,
-  GetPromptRequest,
   GetPromptRequestSchema,
   ListPromptsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 
-export interface ServerHandlers {
-  toolCall: (request: CallToolRequest) => Promise<CallToolResult>;
-  listTools: (request: ListToolsRequest) => Promise<{ tools: Tool[] }>;
-  listResources: (
-    request: ListResourcesRequest,
-  ) => Promise<{ resources: Resource[] }>;
-  readResource: (
-    request: ReadResourceRequest,
-  ) => Promise<{ contents: Resource[] }>;
-  getPrompt: (request: GetPromptRequest) => Promise<Prompt>;
-  listPrompts: (request: ListPromptsRequest) => Promise<{ prompts: Prompt[] }>;
-}
-
 // Start the server
-export async function startServer(handlers: ServerHandlers): Promise<Server> {
+export async function startServer(handlers: IServerHandlers): Promise<Server> {
   // Create the server instance
   const server = new Server(
     {
