@@ -6,6 +6,8 @@ import {
   handleListTools,
   handleListResources,
   handleReadResource,
+  handleGetPrompt,
+  handleListPrompts,
 } from './handlers';
 
 // Start the server
@@ -19,6 +21,8 @@ async function main(): Promise<void> {
     listTools: handleListTools.bind(container),
     listResources: handleListResources.bind(container),
     readResource: handleReadResource.bind(container),
+    getPrompt: handleGetPrompt.bind(container),
+    listPrompts: handleListPrompts.bind(container),
   };
 
   await startServer(handlers);

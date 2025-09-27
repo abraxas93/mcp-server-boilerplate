@@ -12,7 +12,8 @@
     "dev": "cross-env NODE_ENV=dev NODE_NO_WARNINGS=1 tsx watch src/index.ts",
     "test": "jest --passWithNoTests",
     "lint": "eslint . --ext .ts",
-    "lint:fix": "eslint . --ext .ts --fix"
+    "lint:fix": "eslint . --ext .ts --fix",
+    "inspect": "npx @modelcontextprotocol/inspector --config mcp.json"
   },
   "author": "abraxas93",
   "license": "ISC",

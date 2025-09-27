@@ -12,6 +12,11 @@ import {
   ReadResourceRequest,
   Tool,
   Resource,
+  ListPromptsRequest,
+  Prompt,
+  GetPromptRequest,
+  GetPromptRequestSchema,
+  ListPromptsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 
 export interface ServerHandlers {
@@ -23,6 +28,8 @@ export interface ServerHandlers {
   readResource: (
     request: ReadResourceRequest,
   ) => Promise<{ contents: Resource[] }>;
+  getPrompt: (request: GetPromptRequest) => Promise<Prompt>;
+  listPrompts: (request: ListPromptsRequest) => Promise<{ prompts: Prompt[] }>;
 }
 
 // Start the server
@@ -37,6 +44,7 @@ export async function startServer(handlers: ServerHandlers): Promise<Server> {
       capabilities: {
         tools: {},
         resources: {},
+        prompts: {},
       },
     },
   );
@@ -52,8 +60,14 @@ export async function startServer(handlers: ServerHandlers): Promise<Server> {
 
   // Handle resource reading
   server.setRequestHandler(ReadResourceRequestSchema, handlers.readResource);
+
+  // Handle prompt listing
+  server.setRequestHandler(ListPromptsRequestSchema, handlers.listPrompts);
+
+  // Handle prompt getting
+  server.setRequestHandler(GetPromptRequestSchema, handlers.getPrompt);
+
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.log('Simple MCP Server running on stdio');
   return server;
 }
