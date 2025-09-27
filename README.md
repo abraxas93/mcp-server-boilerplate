@@ -81,10 +81,15 @@ src/
 ├── config/               # Configuration management
 ├── container/            # Dependency injection container
 ├── handlers/            # MCP request handlers
-│   ├── tool-call-handler.ts    # Tool execution handler
-│   ├── tools-handler.ts        # Tool listing handler
-│   ├── resources-handler.ts    # Resource listing handler
+│   ├── call-tool-handler.ts     # Tool execution handler
+│   ├── get-prompt-handler.ts    # Prompt retrieval handler
+│   ├── list-prompts-handler.ts  # Prompt listing handler
+│   ├── list-resources-handler.ts # Resource listing handler
+│   ├── list-tools-handler.ts    # Tool listing handler
 │   └── read-resource-handler.ts # Resource reading handler
+├── prompts/             # MCP prompts implementation
+│   ├── prompt-example.ts # System instructions prompt
+│   └── index.ts         # Prompt exports
 ├── services/            # Business logic services
 │   ├── MathService.ts   # Mathematical operations
 │   └── ErrorService.ts  # Error handling and formatting
@@ -92,6 +97,8 @@ src/
 │   ├── echo.ts          # Echo tool
 │   ├── add-two-numbers.ts # Math tool
 │   └── get-time.ts      # Time tool
+├── __tests__/           # Test suites
+│   └── add-two-numbers.test.ts # Comprehensive tool tests
 ├── types/               # TypeScript type definitions
 ├── index.ts            # Application entry point & handler binding
 └── server.ts           # MCP server setup & protocol configuration
@@ -175,6 +182,25 @@ The server provides two example resources:
 **URI**: `config://server-info`  
 **Type**: `application/json`  
 **Description**: Information about this MCP server including capabilities and available tools
+
+## 💬 Available Prompts
+
+The server includes prompt support for system instructions:
+
+### System Instructions Prompt
+
+**Name**: `system-instructions`  
+**Description**: Plain instructions to be used as a future system prompt  
+**Content**: Role and policy definitions for AI assistants
+
+**Example Usage**:
+
+```json
+{
+  "name": "system-instructions",
+  "arguments": {}
+}
+```
 
 ## 🛠️ Adding New Tools
 
@@ -276,7 +302,7 @@ export async function handleToolCall(
 
 ### 1. Update Resources Handler
 
-Add your resource to `src/handlers/resources-handler.ts`:
+Add your resource to `src/handlers/list-resources-handler.ts`:
 
 ```typescript
 export async function handleListResources(
@@ -322,9 +348,85 @@ export async function handleReadResource(
 }
 ```
 
+## 💬 Adding New Prompts
+
+### 1. Create Prompt Implementation
+
+Create a new file in `src/prompts/`:
+
+```typescript
+// src/prompts/my-prompt.ts
+export const MY_PROMPT = {
+  description: 'Description of what this prompt does',
+  messages: [
+    {
+      role: 'assistant',
+      content: {
+        type: 'text',
+        text: 'Your prompt content here',
+      },
+    },
+  ],
+};
+```
+
+### 2. Register Prompt
+
+Update `src/prompts/index.ts`:
+
+```typescript
+export * from './my-prompt.js';
+```
+
+### 3. Add to Prompts Handler
+
+Update `src/handlers/list-prompts-handler.ts`:
+
+```typescript
+export const PROMPTS = {
+  'system-instructions': {
+    name: 'system-instructions',
+    description: 'Plain instructions to be used as a future system prompt',
+    arguments: [],
+  },
+  'my-prompt': {
+    name: 'my-prompt',
+    description: 'Description of my prompt',
+    arguments: [],
+  },
+};
+```
+
+### 4. Add to Get Prompt Handler
+
+Update `src/handlers/get-prompt-handler.ts`:
+
+```typescript
+import { MY_PROMPT } from '../prompts';
+
+export async function handleGetPrompt(
+  request: GetPromptRequest,
+): Promise<Prompt> {
+  const { name, arguments: _args } = request.params;
+  const prompt = PROMPTS[name as keyof typeof PROMPTS];
+  if (!prompt) throw new Error(`Prompt not found: ${name}`);
+
+  switch (name) {
+    case 'system-instructions': {
+      return SYSTEM_INSTRUCTIONS;
+    }
+    case 'my-prompt': {
+      return MY_PROMPT;
+    }
+    default:
+      throw new Error('Prompt implementation not found');
+  }
+}
+```
+
 ## 🧪 Testing
 
-The boilerplate includes Jest configuration for testing:
+The boilerplate includes comprehensive Jest testing with extensive coverage:
 
 ```bash
 # Run all tests
@@ -334,31 +436,50 @@ npm test
 npm run test:watch
 
 # Run specific test file
-npm test my-tool.test.ts
+npm test add-two-numbers.test.ts
 ```
+
+### Test Coverage
+
+The project includes comprehensive test suites covering:
+
+- **Schema Validation**: Input parameter validation with Zod schemas
+- **Happy Path Scenarios**: Normal operation testing
+- **Error Handling**: Comprehensive error scenario coverage
+- **Service Integration**: Mock service testing
+- **Return Format Validation**: MCP-compliant response testing
+- **Edge Cases**: NaN, Infinity, and boundary value testing
+- **Context Binding**: Proper `this` context handling
 
 ### Example Test Structure
 
+The `add-two-numbers.test.ts` demonstrates comprehensive testing patterns:
+
 ```typescript
-// src/__tests__/tools/echo.test.ts
-import echo from '../../tools/echo.js';
-import { ErrorService } from '../../services/ErrorService.js';
+// src/__tests__/add-two-numbers.test.ts
+import addTwoNumbers from '../tools/add-two-numbers';
+import { IMathService, IErrorService } from '../services';
 
-describe('Echo Tool', () => {
-  const mockErrorService = new ErrorService();
-
-  it('should echo back the input text', () => {
-    const result = echo.call(
-      { errorService: mockErrorService },
-      { text: 'Hello, World!' },
-    );
-
-    expect(result.content).toEqual([
-      { type: 'text', text: 'Echo: Hello, World!' },
-    ]);
-  });
+describe('addTwoNumbers', () => {
+  // Schema validation tests
+  // Happy path tests
+  // Error handling tests
+  // Service integration tests
+  // Return format tests
+  // Edge case tests
+  // Context binding tests
 });
 ```
+
+### Test Categories
+
+1. **Schema Validation Tests**: Ensure input parameters are properly validated
+2. **Happy Path Tests**: Verify normal operation scenarios
+3. **Error Handling Tests**: Test error scenarios and proper error responses
+4. **Service Integration Tests**: Mock service interactions
+5. **Return Format Tests**: Ensure MCP-compliant responses
+6. **Edge Cases**: Handle special values like NaN, Infinity
+7. **Context Binding**: Verify proper `this` context usage
 
 ## 🐳 Docker Support
 
@@ -464,6 +585,7 @@ export async function startServer(handlers: ServerHandlers) {
 
 - ✅ **Tools**: Execute custom functions with parameter validation
 - ✅ **Resources**: Read files and configuration data
+- ✅ **Prompts**: Retrieve system instructions and prompt templates
 - ✅ **Stdio Transport**: Standard input/output communication
 - ✅ **JSON Schema**: Automatic schema generation from Zod schemas
 - ✅ **Type Safety**: Full TypeScript support with MCP SDK types
@@ -474,6 +596,8 @@ export async function startServer(handlers: ServerHandlers) {
 2. **Call Tool**: Client executes tool with parameters
 3. **List Resources**: Client requests available resources
 4. **Read Resource**: Client reads resource content
+5. **List Prompts**: Client requests available prompts
+6. **Get Prompt**: Client retrieves specific prompt content
 
 ## 🤝 Contributing
 
