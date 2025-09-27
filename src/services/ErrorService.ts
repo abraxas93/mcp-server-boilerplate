@@ -1,17 +1,11 @@
 import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 
 export interface IErrorService {
-  handleError(error: unknown, context: ErrorContext): CallToolResult;
-}
-
-export interface ErrorContext {
-  operation: string;
-  params?: Record<string, unknown>;
-  timestamp?: string;
+  handleError(error: unknown, context: IErrorContext): CallToolResult;
 }
 
 export class ErrorService implements IErrorService {
-  handleError(error: unknown, context: ErrorContext): CallToolResult {
+  handleError(error: unknown, context: IErrorContext): CallToolResult {
     const timestamp = context.timestamp || new Date().toISOString();
 
     // Log internal errors to stderr for debugging/monitoring

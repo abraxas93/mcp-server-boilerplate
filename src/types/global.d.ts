@@ -10,3 +10,9 @@ interface IServerHandlers {
   getPrompt: (request: GetPromptRequest) => Promise<Prompt>;
   listPrompts: (request: ListPromptsRequest) => Promise<{ prompts: Prompt[] }>;
 }
+
+interface IErrorContext {
+  operation: string;
+  params?: Record<string, unknown>;
+  timestamp?: string;
+}
