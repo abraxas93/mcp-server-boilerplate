@@ -23,6 +23,7 @@ export default function addTwoNumbers(
   params: AddTwoNumbersParams,
 ): CallToolResult {
   try {
+    addTwoNumbersInputSchema.parse(params);
     const result = this.mathService.add(params.a, params.b);
     return {
       content: [
