@@ -1,9 +1,12 @@
 #!/usr/bin/env node
 import { startServer } from './server.js';
+import createContainer from './container/index.js';
 
 // Start the server
 async function main(): Promise<void> {
-  await startServer();
+  // Create container instance for DI
+  const container = createContainer();
+  await startServer(container);
 }
 
 main().catch((error) => {

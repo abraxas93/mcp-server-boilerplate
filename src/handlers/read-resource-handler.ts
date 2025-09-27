@@ -1,8 +1,11 @@
-import { ReadResourceRequest } from '@modelcontextprotocol/sdk/types.js';
+import {
+  ReadResourceRequest,
+  Resource,
+} from '@modelcontextprotocol/sdk/types.js';
 
 export async function handleReadResource(
   request: ReadResourceRequest,
-): Promise<{ contents: any[] }> {
+): Promise<{ contents: Resource[] }> {
   const { uri } = request.params;
 
   switch (uri) {

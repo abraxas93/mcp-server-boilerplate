@@ -1,6 +1,7 @@
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { z } from 'zod';
 import { CallToolResult, Tool } from '@modelcontextprotocol/sdk/types.js';
+import { IErrorService } from '../services';
 
 export const getTimeInputSchema = z.object({
   random_string: z
@@ -19,13 +20,24 @@ export const GET_TIME_TOOL: Tool = {
   }) as Tool['inputSchema'],
 };
 
-export default function getTime(_params: GetTimeParams): CallToolResult {
-  return {
-    content: [
-      {
-        type: 'text',
-        text: `Current time: ${new Date().toISOString()}`,
-      },
-    ],
-  };
+export default function getTime(
+  this: { errorService: IErrorService },
+  _params: GetTimeParams,
+): CallToolResult {
+  try {
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `Current time: ${new Date().toISOString()}`,
+        },
+      ],
+    };
+  } catch (error) {
+    return this.errorService.handleError(error, {
+      operation: 'getTime',
+      params: {},
+      timestamp: new Date().toISOString(),
+    });
+  }
 }

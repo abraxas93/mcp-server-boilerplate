@@ -3,7 +3,7 @@ import {
   IErrorService,
   MathService,
   ErrorService,
-} from 'src/services';
+} from '../services';
 
 export interface IContainer {
   mathService: IMathService;
