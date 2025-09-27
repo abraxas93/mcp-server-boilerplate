@@ -1,6 +1,6 @@
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { z } from 'zod';
-import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
+import { CallToolResult, Tool } from '@modelcontextprotocol/sdk/types.js';
 import { IMathService, IErrorService } from '../services';
 
 export const addTwoNumbersInputSchema = z.object({
@@ -10,10 +10,12 @@ export const addTwoNumbersInputSchema = z.object({
 
 export type AddTwoNumbersParams = z.infer<typeof addTwoNumbersInputSchema>;
 
-export const ADD_TWO_NUMBERS_TOOL = {
+export const ADD_TWO_NUMBERS_TOOL: Tool = {
   name: 'add',
   description: 'Add two numbers together',
-  inputSchema: zodToJsonSchema(addTwoNumbersInputSchema),
+  inputSchema: zodToJsonSchema(addTwoNumbersInputSchema, {
+    target: 'jsonSchema7',
+  }) as Tool['inputSchema'],
 };
 
 export default function addTwoNumbers(

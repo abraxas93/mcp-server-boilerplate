@@ -1,3 +1,3 @@
-export * from './addTwoNumbers.js';
+export * from './add-two-numbers.js';
 export * from './echo.js';
-export * from './getTime.js';
+export * from './get-time.js';

@@ -1,15 +1,22 @@
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { z } from 'zod';
-import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
+import { CallToolResult, Tool } from '@modelcontextprotocol/sdk/types.js';
 
-export const getTimeInputSchema = z.object({});
+export const getTimeInputSchema = z.object({
+  random_string: z
+    .string()
+    .optional()
+    .describe('Dummy parameter for no-parameter tools'),
+});
 
 export type GetTimeParams = z.infer<typeof getTimeInputSchema>;
 
-export const GET_TIME_TOOL = {
+export const GET_TIME_TOOL: Tool = {
   name: 'get_time',
   description: 'Get current timestamp',
-  inputSchema: zodToJsonSchema(getTimeInputSchema),
+  inputSchema: zodToJsonSchema(getTimeInputSchema, {
+    target: 'jsonSchema7',
+  }) as Tool['inputSchema'],
 };
 
 export default function getTime(_params: GetTimeParams): CallToolResult {
