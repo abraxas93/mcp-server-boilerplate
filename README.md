@@ -10,7 +10,7 @@ A production-ready TypeScript boilerplate for building Model Context Protocol (M
 - ⚡ **TypeScript** - Type-safe development with modern ES features
 - 🛠️ **Tool System** - Easy-to-extend tool architecture with Zod validation
 - 📁 **Resource Management** - File and configuration resource support
-- 🎯 **Clean Architecture** - Dependency injection and service layer separation
+- 🎯 **Clean Architecture** - Dependency injection, handler binding, and service layer separation
 - 🚨 **Error Handling** - Comprehensive error management with proper MCP responses
 - 🧪 **Testing Ready** - Jest configuration for unit and integration tests
 - 🐳 **Docker Support** - Container-ready deployment
@@ -93,8 +93,8 @@ src/
 │   ├── add-two-numbers.ts # Math tool
 │   └── get-time.ts      # Time tool
 ├── types/               # TypeScript type definitions
-├── index.ts            # Application entry point
-└── server.ts           # MCP server setup
+├── index.ts            # Application entry point & handler binding
+└── server.ts           # MCP server setup & protocol configuration
 ```
 
 ## 🔧 Available Tools
@@ -416,6 +416,48 @@ The boilerplate includes comprehensive error handling:
 - **Error categorization**: Different handling for TypeError, RangeError, etc.
 - **Context preservation**: Operation context and parameters in error logs
 
+## 🏛️ Architecture Overview
+
+### Handler-Based Architecture
+
+The server uses a clean handler-based architecture with dependency injection:
+
+1. **Application Entry Point** (`index.ts`):
+   - Creates dependency injection container
+   - Binds handlers with container context
+   - Passes bound handlers to server
+
+2. **Server Setup** (`server.ts`):
+   - Focuses purely on MCP protocol configuration
+   - Accepts pre-bound handlers as constructor parameters
+   - No knowledge of handler implementations
+
+3. **Benefits**:
+   - **Single Responsibility**: Server only handles MCP protocol
+   - **Testability**: Easy to inject mock handlers for testing
+   - **Flexibility**: Handler composition at application level
+   - **Type Safety**: Full TypeScript support with proper MCP types
+
+### Handler Binding Flow
+
+```typescript
+// index.ts - Application wiring
+const container = createContainer();
+const handlers = {
+  toolCall: handleToolCall.bind(container),
+  listTools: handleListTools.bind(container),
+  // ... other handlers
+};
+await startServer(handlers);
+
+// server.ts - Protocol setup
+export async function startServer(handlers: ServerHandlers) {
+  // MCP server configuration only
+  server.setRequestHandler(CallToolRequestSchema, handlers.toolCall);
+  // ... other request handlers
+}
+```
+
 ## 🔌 MCP Protocol Features
 
 ### Supported Capabilities
@@ -424,6 +466,7 @@ The boilerplate includes comprehensive error handling:
 - ✅ **Resources**: Read files and configuration data
 - ✅ **Stdio Transport**: Standard input/output communication
 - ✅ **JSON Schema**: Automatic schema generation from Zod schemas
+- ✅ **Type Safety**: Full TypeScript support with MCP SDK types
 
 ### Request/Response Flow
 

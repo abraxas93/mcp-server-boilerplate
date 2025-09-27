@@ -5,18 +5,28 @@ import {
   ListResourcesRequestSchema,
   ListToolsRequestSchema,
   ReadResourceRequestSchema,
+  CallToolRequest,
+  CallToolResult,
+  ListToolsRequest,
+  ListResourcesRequest,
+  ReadResourceRequest,
+  Tool,
+  Resource,
 } from '@modelcontextprotocol/sdk/types.js';
 
-import {
-  handleToolCall,
-  handleListTools,
-  handleListResources,
-  handleReadResource,
-} from './handlers';
-import { IContainer } from './container/index.js';
+export interface ServerHandlers {
+  toolCall: (request: CallToolRequest) => Promise<CallToolResult>;
+  listTools: (request: ListToolsRequest) => Promise<{ tools: Tool[] }>;
+  listResources: (
+    request: ListResourcesRequest,
+  ) => Promise<{ resources: Resource[] }>;
+  readResource: (
+    request: ReadResourceRequest,
+  ) => Promise<{ contents: Resource[] }>;
+}
 
 // Start the server
-export async function startServer(container: IContainer): Promise<Server> {
+export async function startServer(handlers: ServerHandlers): Promise<Server> {
   // Create the server instance
   const server = new Server(
     {
@@ -32,28 +42,16 @@ export async function startServer(container: IContainer): Promise<Server> {
   );
 
   // List available tools
-  server.setRequestHandler(
-    ListToolsRequestSchema,
-    handleListTools.bind(container),
-  );
+  server.setRequestHandler(ListToolsRequestSchema, handlers.listTools);
 
   // Handle tool calls
-  server.setRequestHandler(
-    CallToolRequestSchema,
-    handleToolCall.bind(container),
-  );
+  server.setRequestHandler(CallToolRequestSchema, handlers.toolCall);
 
   // List available resources
-  server.setRequestHandler(
-    ListResourcesRequestSchema,
-    handleListResources.bind(container),
-  );
+  server.setRequestHandler(ListResourcesRequestSchema, handlers.listResources);
 
   // Handle resource reading
-  server.setRequestHandler(
-    ReadResourceRequestSchema,
-    handleReadResource.bind(container),
-  );
+  server.setRequestHandler(ReadResourceRequestSchema, handlers.readResource);
   const transport = new StdioServerTransport();
   await server.connect(transport);
   console.log('Simple MCP Server running on stdio');
